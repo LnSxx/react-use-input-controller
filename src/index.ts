@@ -1,11 +1,19 @@
 import { useState } from 'react'
-import type { ValidationResult } from '../ValidationResult'
-import {
-  ValidationError,
-  ValidationSuccess
-} from '../ValidationResult'
 
-interface UseTextInputControllerArguments {
+abstract class ValidationResult { }
+
+export class ValidationSuccess extends ValidationResult { }
+
+export class ValidationError extends ValidationResult {
+  constructor (errorMessage: string) {
+    super()
+    this.errorMessage = errorMessage
+  }
+
+  errorMessage: string
+}
+
+export interface UseTextInputControllerArguments {
   initialValue: string
   validators?: Array<(value: string) => ValidationResult>
 }
@@ -22,7 +30,7 @@ export function useTextInputController ({
   ] {
   const [textInputValue, setTextInputValue] = useState<string>(initialValue)
   const [validationError, setValidationError] =
-    useState<ValidationResult>(new ValidationSuccess())
+      useState<ValidationResult>(new ValidationSuccess())
 
   function onChangedHandler (event: React.ChangeEvent<HTMLInputElement>): void {
     const inputValue: string = event.target.value
@@ -44,3 +52,5 @@ export function useTextInputController ({
 
   return [textInputValue, validationError, onChangedHandler, validate]
 }
+
+export type { ValidationResult }
