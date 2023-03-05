@@ -44,6 +44,7 @@
         "@typescript-eslint/no-use-before-define": [
             "error"
         ],
+        "@typescript-eslint/no-extraneous-class": "off",
         "react/jsx-filename-extension": [
             1,
             {
@@ -94,4 +95,3 @@
         }
     }
 }
-
