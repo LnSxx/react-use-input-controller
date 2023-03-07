@@ -14,7 +14,7 @@ npm install react-use-input-controller
 By default, `useTextInputController({initialValue: ''})` returns a tuple of an input 
 `string` value, validation result, a setter for the value, and a function that calls validators.
 
-```javascript
+```typescript
 import useInputValidation from 'use-input-validation';
 
 const [
@@ -36,7 +36,14 @@ const [
 The `useTextInputController` hook returns a tuple containing the following values:
 
 - `inputValue`: the current value of the input. It is a `string` type.
-- `validationResult`: an object of the `ValidationResult` class that can be either `ValidationResult` or `ValidationError`. The `ValidationError` has a `errorMessage` property that can be shown on the UI.
+- `validationResult`: The ok property is a boolean value that indicates whether the validation was successful or not. When ok is true, the value property contains the valid input value as a string. When ok is false, the errorMessage property contains a string with an error message explaining why the input value is invalid. property that can be shown on the UI.
+
+```typescript
+type ValidationResult =
+  | { ok: true, value: string }
+  | { ok: false, errorMessage: string }
+```
+
 - `onChanged`: a function that can be used as an onChange event handler for the input field. When called, it updates the value of the input.
 - `validate`: a function that calls all the validators in the validators array and updates the validationResult object.
 
@@ -45,20 +52,28 @@ The `useTextInputController` hook returns a tuple containing the following value
 This `useTextInputController` function takes an options object as an argument which contains two properties:
 
 - `initialValue`: The initial value for the input field. It is a string type.
-- `validators`: An array of functions that validate the input field value. Each function should take the input field value as its argument and return `ValidationResult`. These validators will be applied sequentially to the input content. So, if a field is required, first pass a function that will check whether the field has text or not. Then pass all the other validations you want. When the `validate()` function is called, the first validation error will be returned to you.
+- `validators`: An array of functions that validate the input field value. Each function should take the input field value as its argument and return `ValidationResult` type objects. These validators will be applied sequentially to the input content. So, if a field is required, first pass a function that will check whether the field has text or not. Then pass all the other validations you want. When the `validate()` function is called, the first validation error will be returned to you.
 
-```javascript
+```typescript
+import { type ValidationResult } from 'use-input-validation'
+
 function textRequiredInputValidation (text: string): ValidationResult {
   if (text.trim().length === 0) {
-    return new ValidationError('Field is required')
+    return {
+      ok: false,
+      errorMessage: 'Field is required'
+    }
   }
-  return new ValidationSuccess()
+  return {
+      ok: true,
+      errorMessage: text
+    }
 }
 ```
 
 ## Example
 
-```javascript
+```typescript
 function MyComponent (): JSX.Element {
   const [
     inputValue,
@@ -79,9 +94,9 @@ function MyComponent (): JSX.Element {
         htmlFor={ id }
         className={
             // Check validation result if error.
-          validationError instanceof ValidationError
-            ? "errorLabelStyle"
-            : "defaultLabelStyle"
+          validationError.ok
+            ? "defaultLabelStyle"
+            : "errorLabelStyle"
         }
       >
         { label }
@@ -94,23 +109,19 @@ function MyComponent (): JSX.Element {
         onBlur={ validate }
         type="text"
         className={
-          validationError instanceof ValidationError
-            ? "errorStateStyle"
-            : "defaultStateStyle"
+          validationError.ok
+            ? "defaultStateStyle"
+            : "errorStateStyle"
         }
       />
       // Show error message
       <p>
-        { 
-            validationError instanceof ValidationError 
-            ? validationError.errorMessage : 
-            '' 
-        }
+        { !validationError.ok ? validationError.errorMessage : '' }
       </p>
     </div>
   )
 }
 ```
 
-Feel free to raise an issue to discuss other use cases that aren't covered here
+You are welcome to create an issue if you would like to discuss any other use cases that have not been addressed here.
 
